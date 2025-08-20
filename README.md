@@ -5,7 +5,7 @@
 conda create -n myenv python=3.10 -y
 ```
 ```bash
-conda activate myenv
+conda activate myenv 
 ```
 
 ### Install the requirements
