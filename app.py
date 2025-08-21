@@ -5,6 +5,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import create_history_aware_retriever
+
 from dotenv import load_dotenv
 from src.prompt import *
 import os
@@ -42,8 +45,14 @@ prompt=ChatPromptTemplate.from_messages(
     ]
 )
 
+chat_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+
 question_answer_chain=create_stuff_documents_chain(chatModel,prompt)
 rag_chain=create_retrieval_chain(retriever,question_answer_chain)
+
+
+
 
 
 @app.route("/")
@@ -55,7 +64,7 @@ def chat():
     msg=request.form["msg"]
     input=msg
     print(msg)
-    response=rag_chain.invoke({"input":msg})
+    response=rag_chain.invoke({"input":msg,"chat_history": chat_memory.load_memory_variables({})["chat_history"]})
     print("Response : ",response['answer'])
     return str(response['answer'])
 
